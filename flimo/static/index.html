@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flimo - Explore Movies</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css?v=39">
+</head>
+
+<body>
+    <div class="app-layout">
+
+        <!-- ========== LEFT SIDEBAR ========== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <span class="material-symbols-outlined"
+                        style="font-variation-settings:'FILL' 1;">movie_filter</span>
+                </div>
+                <div>
+                    <h1 class="sidebar-logo-title">Flimo</h1>
+                    <p class="sidebar-logo-subtitle">Premium Member</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav custom-scrollbar">
+                <div class="nav-group">
+                    <p class="nav-group-label">Menu</p>
+                    <a href="/" class="nav-item active" data-link data-view="view-home">
+                        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">home</span>
+                        <span>Home</span>
+                    </a>
+                    <a href="/search" class="nav-item" data-link data-view="view-search">
+                        <span class="material-symbols-outlined">explore</span>
+                        <span>Explore</span>
+                    </a>
+                </div>
+                <div class="nav-group">
+                    <p class="nav-group-label">Discovery</p>
+                    <a href="/" class="nav-item" data-link data-view="view-home" data-mode="trending">
+                        <span class="material-symbols-outlined">local_fire_department</span>
+                        <span>Trending Now</span>
+                    </a>
+                    <a href="/" class="nav-item" data-link data-view="view-home" data-mode="latest">
+                        <span class="material-symbols-outlined">new_releases</span>
+                        <span>New Releases</span>
+                    </a>
+                    <a href="/saved" class="nav-item" data-link data-view="view-saved">
+                        <span class="material-symbols-outlined">bookmarks</span>
+                        <span>Watchlist</span>
+                    </a>
+                </div>
+                <div class="nav-group">
+                    <p class="nav-group-label">Social</p>
+                    <a href="/community" class="nav-item" data-link data-view="view-community">
+                        <span class="material-symbols-outlined">group</span>
+                        <span>Community</span>
+                    </a>
+                    <a href="/profile" class="nav-item" data-link data-view="view-profile">
+                        <span class="material-symbols-outlined">person</span>
+                        <span>Profile</span>
+                    </a>
+                </div>
+            </nav>
+
+        </aside>
+
+        <!-- ========== MAIN CONTENT ========== -->
+        <main class="main-area">
+
+            <!-- Top Header Bar -->
+            <header class="top-header">
+                <div class="header-left">
+                    <span class="material-symbols-outlined header-icon">search</span>
+                    <h2 class="header-title" id="page-title">Home</h2>
+                </div>
+                <div class="header-right">
+                    <button class="icon-btn" id="notification-btn">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span class="notif-dot"></span>
+                    </button>
+                    <div class="header-divider"></div>
+                    
+                    <!-- Global Auth Section -->
+                    <section class="auth-section-header">
+                        <div id="community-login" class="login-trigger-section">
+                            <button class="login-circle-btn" id="login-trigger-btn" title="Sign In">
+                                <span class="material-symbols-outlined">person</span>
+                            </button>
+                            <span class="login-hint-text">Sign in</span>
+                        </div>
+                        <div id="community-profile" class="profile-section hidden">
+                            <div class="profile-card">
+                                <div class="profile-avatar" id="profile-avatar">A</div>
+                                <div class="profile-info">
+                                    <h3 id="profile-display-name">User</h3>
+                                    <p class="text-muted" id="profile-email">email@example.com</p>
+                                </div>
+                                <div class="profile-actions">
+                                    <button class="btn-secondary-sm" id="edit-profile-btn">Edit</button>
+                                    <button class="btn-secondary-sm" id="logout-btn">Logout</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="content-scroll custom-scrollbar">
+
+                <!-- ===== PAGE 1: HOME ===== -->
+                <div id="view-home" class="view-section">
+                    <div class="content-container">
+                        <!-- Hero Search Area -->
+                        <div class="hero-search-section">
+                            <h1 class="hero-search-title">What can I help with?</h1>
+                            <div class="ai-prompt-wrapper">
+                                <span class="material-symbols-outlined prompt-icon">add</span>
+                                <input type="text" id="home-search-input" class="ai-prompt-input"
+                                    placeholder="Ask anything">
+                                <div class="prompt-actions">
+                                    <button class="icon-btn-transparent"><span class="material-symbols-outlined">mic</span></button>
+                                    <button class="icon-btn-primary-small"><span class="material-symbols-outlined">graphic_eq</span></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Controls Row -->
+                        <div class="controls-row">
+                            <!-- Mood Buttons -->
+                            <div class="filter-dropdown">
+                                <span class="filter-dropdown-text">Mood: All</span>
+                                <span class="material-symbols-outlined filter-dropdown-icon">expand_more</span>
+                            </div>
+
+                            <!-- Genre Chips -->
+                            <div class="chips-divider"></div>
+                            <div class="genre-chips-row" id="home-genre-chips">
+                                <button class="genre-chip" data-genre="action">Action</button>
+                                <button class="genre-chip" data-genre="science fiction">Sci-Fi</button>
+                                <button class="genre-chip" data-genre="drama">Drama</button>
+                                <button class="genre-chip" data-genre="comedy">Comedy</button>
+                                <button class="genre-chip" data-genre="thriller">Thriller</button>
+                                <button class="genre-chip" data-genre="horror">Horror</button>
+                                <button class="genre-chip" data-genre="romance">Romance</button>
+                                <button class="genre-chip" data-genre="adventure">Adventure</button>
+                            </div>
+                        </div>
+
+                        <!-- Discovery Mode Buttons -->
+                        <div class="controls-row" style="margin-top: -0.5rem;">
+                            <div class="mood-buttons" id="home-mood-buttons">
+                                <button class="mood-btn" data-mood="happy">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">mood</span> Happy
+                                </button>
+                                <button class="mood-btn" data-mood="dark">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">dark_mode</span>
+                                    Dark
+                                </button>
+                                <button class="mood-btn" data-mood="epic">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">bolt</span> Epic
+                                </button>
+                                <button class="mood-btn" data-mood="thoughtful">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">psychology</span>
+                                    Thoughtful
+                                </button>
+                                <button class="mood-btn" data-mood="emotional">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">favorite</span>
+                                    Emotional
+                                </button>
+                            </div>
+                            <div class="chips-divider"></div>
+                            <div class="discover-buttons" id="discover-buttons">
+                                <button class="discover-btn active" data-mode="popular">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">star</span> Popular
+                                </button>
+                                <button class="discover-btn" data-mode="trending">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">trending_up</span>
+                                    Trending
+                                </button>
+                                <button class="discover-btn" data-mode="latest">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">fiber_new</span>
+                                    Latest
+                                </button>
+                            </div>
+                        </div>
+
+
+
+                        <!-- Continue Watching -->
+                        <section id="continue-watching-section" class="content-section hidden">
+                            <h3 class="section-heading">
+                                <span class="material-symbols-outlined" style="font-size:20px;">schedule</span> Continue
+                                Watching
+                            </h3>
+                            <div class="horizontal-scroll" id="continue-watching-grid"></div>
+                        </section>
+
+                        <!-- Personalized Recommendations -->
+                        <section id="personal-recs-section" class="content-section hidden">
+                            <h3 class="section-heading" id="personal-recs-heading">
+                                <span class="material-symbols-outlined" style="font-size:20px;">auto_awesome</span>
+                                Because You Watched...
+                            </h3>
+                            <div class="horizontal-scroll" id="personal-recs-grid"></div>
+                        </section>
+
+                        <!-- Discover Results -->
+                        <section id="discover-results-section" class="content-section">
+                            <div class="section-top">
+                                <h3 class="section-heading" id="discover-heading">
+                                    <span class="material-symbols-outlined" style="font-size:20px;">star</span> Popular
+                                    Movies & Series
+                                </h3>
+                                <div class="sort-control">
+                                    <span class="sort-label">Sort by:</span>
+                                    <button class="sort-btn">Popularity
+                                        <span class="material-symbols-outlined"
+                                            style="font-size:14px;">keyboard_arrow_down</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="results-grid" id="discover-results-grid"></div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE 2: SEARCH (Explore) ===== -->
+                <div id="view-search" class="view-section hidden">
+                    <div class="content-container">
+                        <div class="search-top-bar">
+                            <div class="search-row">
+                                <input type="text" id="search-page-input" class="search-bar-input"
+                                    placeholder="Search movies, series...">
+                                <button class="filter-btn" id="open-filters-btn">
+                                    <span class="material-symbols-outlined">tune</span> Filters
+                                </button>
+                            </div>
+
+                            <div class="scope-tabs-container">
+                                <button class="scope-tab active" data-scope="movie">Movies</button>
+                                <button class="scope-tab" data-scope="series">Series</button>
+                            </div>
+
+                            <div class="category-toggles" id="category-toggles">
+                                <button class="category-btn active" data-category="trending">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">trending_up</span>
+                                    Trending
+                                </button>
+                                <button class="category-btn" data-category="popular">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">star</span> Popular
+                                </button>
+                                <button class="category-btn" data-category="latest">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">fiber_new</span>
+                                    Latest
+                                </button>
+                            </div>
+
+                            <div class="mood-chips-container" id="mood-chips">
+                                <button class="chip mood-chip" data-mood="chill">Chill</button>
+                                <button class="chip mood-chip" data-mood="thriller">Thriller</button>
+                                <button class="chip mood-chip" data-mood="dark">Dark</button>
+                                <button class="chip mood-chip" data-mood="happy">Feel Good</button>
+                                <button class="chip mood-chip" data-mood="romantic">Romantic</button>
+                                <button class="chip mood-chip" data-mood="inspiring">Inspiring</button>
+                            </div>
+                        </div>
+
+                        <div class="search-results-wrapper">
+                            <h3 class="results-heading" id="search-results-heading">
+                                <span class="material-symbols-outlined" style="font-size:20px;">trending_up</span>
+                                Trending Movies
+                            </h3>
+                            <div class="results-grid" id="search-results-grid"></div>
+                            <div id="trigger-search" class="scroll-trigger"></div>
+                            <div class="loading-indicator hidden" id="search-loading">Loading more...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Popup Modal -->
+                <div class="filter-popup-overlay hidden" id="filter-popup-overlay">
+                    <div class="filter-popup">
+                        <div class="filter-popup-header">
+                            <h3>Filters</h3>
+                            <button class="popup-close" id="close-filters-btn">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div class="filter-popup-body">
+                            <div class="filter-group">
+                                <label class="filter-label">Release Year</label>
+                                <div class="range-slider-container">
+                                    <div class="range-values">
+                                        <span id="year-min-val">1980</span> — <span id="year-max-val">2025</span>
+                                    </div>
+                                    <div class="range-track"></div>
+                                    <input type="range" id="year-min" min="1980" max="2025" value="1980">
+                                    <input type="range" id="year-max" min="1980" max="2025" value="2025">
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Minimum Rating</label>
+                                <div class="rating-options">
+                                    <button class="chip rating-chip" data-rating="6">
+                                        <span class="material-symbols-outlined"
+                                            style="font-size:14px;font-variation-settings:'FILL' 1;">star</span> 6+
+                                    </button>
+                                    <button class="chip rating-chip" data-rating="7">
+                                        <span class="material-symbols-outlined"
+                                            style="font-size:14px;font-variation-settings:'FILL' 1;">star</span> 7+
+                                    </button>
+                                    <button class="chip rating-chip" data-rating="8">
+                                        <span class="material-symbols-outlined"
+                                            style="font-size:14px;font-variation-settings:'FILL' 1;">star</span> 8+
+                                    </button>
+                                    <button class="chip rating-chip" data-rating="9">
+                                        <span class="material-symbols-outlined"
+                                            style="font-size:14px;font-variation-settings:'FILL' 1;">star</span> 9+
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-popup-footer">
+                            <button class="btn-secondary" id="reset-filters-btn">Reset</button>
+                            <button class="btn-primary" id="apply-filters-btn">Apply Filters</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE 3: SAVED ===== -->
+                <div id="view-saved" class="view-section hidden">
+                    <div class="content-container">
+                        <h2 class="page-title">Your Saved Collection</h2>
+                        <div class="results-grid" id="saved-grid"></div>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE 4: COMMUNITY ===== -->
+                <div id="view-community" class="view-section hidden">
+                    <div class="content-container">
+                        <h2 class="page-title">Community</h2>
+
+                        <!-- Login Modal now handles authentication globally -->
+
+                        <!-- Login Modal -->
+                        <div id="login-modal" class="login-modal hidden">
+                            <div class="login-modal-backdrop"></div>
+                            <div class="login-modal-content">
+                                <button class="login-modal-close" id="login-modal-close">
+                                    <span class="material-symbols-outlined">close</span>
+                                </button>
+                                <h3>Join the Community</h3>
+                                <p class="text-muted">Sign in with your email to chat and comment</p>
+                                <div class="login-form">
+                                    <input type="email" id="login-email" class="login-input"
+                                        placeholder="your@email.com">
+                                    <button class="btn-primary" id="login-btn">Sign In</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Global Chat -->
+                        <section class="content-section" style="margin-top: -0.5rem;">
+                            <h3 class="section-heading">
+                                <span class="material-symbols-outlined" style="font-size:20px;">chat</span> Global Chat
+                            </h3>
+                            <div class="chat-container" id="chat-container">
+                                <div class="chat-header">
+                                    <h4>
+                                        <span class="material-symbols-outlined" style="font-size:18px;">movie</span>
+                                        Movie Chat
+                                    </h4>
+                                    <span class="connection-status" id="chat-connection-status">Connecting...</span>
+                                </div>
+
+                                <div class="chat-username-modal hidden" id="chat-username-modal">
+                                    <div class="username-modal-content">
+                                        <h4>Join the Chat</h4>
+                                        <p>Choose a username to start chatting</p>
+                                        <div class="username-input-group">
+                                            <input type="text" id="chat-username-input" placeholder="Enter username..."
+                                                maxlength="20" autocomplete="off">
+                                            <span class="username-error hidden" id="chat-username-error"></span>
+                                            <button class="btn-primary" id="chat-username-submit">Join Chat</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="rate-limit-warning hidden" id="chat-rate-limit-warning">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">schedule</span> Slow
+                                    down! 1 message per second.
+                                </div>
+
+                                <div class="chat-messages" id="chat-messages">
+                                    <p class="text-muted chat-placeholder">Loading chat...</p>
+                                </div>
+
+                                <div class="chat-input-area hidden" id="chat-input-area">
+                                    <input type="text" id="chat-input" class="chat-input"
+                                        placeholder="Type a message..." maxlength="500" autocomplete="off">
+                                    <button class="btn-primary" id="chat-send-btn">Send</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Top Rated This Week -->
+                        <section class="content-section">
+                            <h3 class="section-heading">Top Rated This Week</h3>
+                            <div class="results-grid" id="community-top-rated"></div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE 5: PROFILE ===== -->
+                <div id="view-profile" class="view-section hidden">
+                    <div class="content-container">
+                        <h2 class="page-title">Your Profile</h2>
+                        <div class="stats-row">
+                            <div class="stat-card">
+                                <span>0</span>
+                                <label>Watchlisted</label>
+                            </div>
+                            <div class="stat-card">
+                                <span>0</span>
+                                <label>Liked</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE 6: DETAIL VIEW ===== -->
+                <div id="view-detail" class="view-section hidden">
+                    <!-- Hero Section -->
+                    <section class="detail-hero">
+                        <div class="detail-hero-bg" id="detail-hero-bg"></div>
+                        <div class="detail-hero-content">
+                            <button class="back-btn" id="detail-back-btn">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                                <span>Back to Browse</span>
+                            </button>
+
+                            <div class="detail-hero-grid">
+                                <div class="detail-hero-left">
+                                    <div class="detail-badges">
+                                        <span class="badge-accent hidden" id="detail-badge-trending">Trending</span>
+                                        <span class="badge-text" id="detail-meta-text"></span>
+                                    </div>
+                                    <h2 class="detail-main-title" id="detail-main-title"></h2>
+
+                                    <div class="detail-stats-row border-primary">
+                                        <div class="detail-stat">
+                                            <div class="stat-value-group text-primary">
+                                                <span class="material-symbols-outlined stat-icon"
+                                                    style="font-variation-settings: 'FILL' 1">star</span>
+                                                <span class="stat-value text-primary" id="detail-main-rating"></span>
+                                            </div>
+                                        </div>
+                                        <div class="stat-divider bg-slate"></div>
+                                        <div class="detail-stat">
+                                            <span class="stat-value" id="detail-main-genres"></span>
+                                            <span class="stat-label">Genre</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-providers hidden" id="detail-providers">
+                                        <h4 class="providers-title">Where to Watch</h4>
+                                        <div class="providers-list" id="detail-providers-list">
+                                            <!-- Dynamically injected via JS -->
+                                        </div>
+                                    </div>
+
+                                    <div class="detail-actions">
+                                        <button class="btn-primary btn-lg" id="detail-play-btn">
+                                            <span class="material-symbols-outlined"
+                                                style="font-variation-settings: 'FILL' 1">play_arrow</span> Watch Now
+                                        </button>
+                                        <button class="btn-secondary btn-lg hidden" id="detail-trailer-btn">
+                                            <span class="material-symbols-outlined">smart_display</span> Watch Trailer
+                                        </button>
+                                        <button class="btn-secondary btn-lg" id="detail-watchlist-btn">
+                                            <span class="material-symbols-outlined">add</span> Add to Watchlist
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="detail-hero-right">
+                                    <div class="detail-synopsis-wrapper">
+                                        <h3 class="detail-section-title border-l-primary"
+                                            style="margin-bottom: 0.5rem;">Synopsis</h3>
+                                        <p class="detail-synopsis-text" id="detail-synopsis-text"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Detailed Info Content -->
+                    <div class="detail-content-container">
+                        <div class="detail-main-column">
+
+                            <!-- Cast & Crew -->
+                            <div class="detail-section">
+                                <div class="detail-section-header">
+                                    <h3 class="detail-section-title border-l-primary mb-0">Cast & Crew</h3>
+                                </div>
+                                <div class="detail-cast-grid" id="detail-cast-grid"></div>
+                            </div>
+
+                            <!-- Comments Section -->
+                            <div class="detail-section">
+                                <h3 class="detail-section-title border-l-primary">Comments</h3>
+                                <div class="comments-list" id="panel-comments"></div>
+                                <div class="comment-form hidden" id="comment-form">
+                                    <textarea id="comment-input" class="comment-input" placeholder="Write a comment..."
+                                        maxlength="1000"></textarea>
+                                    <button class="btn-primary btn-sm" id="submit-comment-btn">Post Comment</button>
+                                </div>
+                                <p class="text-muted comment-login-hint" id="comment-login-hint">Sign in to leave a
+                                    comment</p>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Ratings and Similar -->
+                        <div class="detail-side-column">
+                            <!-- Audience Score -->
+                            <div class="detail-card bg-primary-muted border-primary-subtle">
+                                <h4 class="detail-card-title flex-title">
+                                    <span class="material-symbols-outlined text-primary">analytics</span> Audience Score
+                                </h4>
+                                <div class="detail-score-box">
+                                    <div class="score-big text-primary" id="detail-side-rating"></div>
+                                </div>
+                                <!-- Dynamic rating bars container -->
+                                <div class="rating-bars" id="detail-rating-bars">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+
+                            <!-- Similar To This -->
+                            <div class="detail-section mt-4">
+                                <h4 class="detail-section-title border-l-primary">Similar To This</h4>
+                                <div class="detail-similar-list" id="detail-similar-list"></div>
+                            </div>
+
+                            <!-- Movie Info -->
+                            <div class="detail-section mb-0 border-t-primary-subtle pt-4">
+                                <h4 class="detail-info-title">Movie Info</h4>
+                                <div class="detail-info-table">
+                                    <div class="info-row">
+                                        <span class="info-label text-muted">Director</span>
+                                        <span class="info-value text-bold" id="detail-info-director">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label text-muted">Language</span>
+                                        <span class="info-value text-bold" id="detail-info-language">English</span>
+                                    </div>
+                                    <div class="info-row" id="detail-info-type-row">
+                                        <span class="info-label text-muted">Type</span>
+                                        <span class="info-value text-bold" id="detail-info-type">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- ========== RIGHT SIDEBAR PANEL ========== -->
+        <aside class="right-panel custom-scrollbar" id="right-panel">
+            <div class="right-panel-inner">
+                <!-- Trending Trailers -->
+                <div class="rp-section">
+                    <div class="rp-section-header">
+                        <h3 class="rp-section-title">
+                            <span class="material-symbols-outlined" style="font-size:18px; color: #FF0000;">smart_display</span>
+                            Trending Trailers
+                        </h3>
+                    </div>
+                    <div class="rp-trailer-list" id="rp-trending-list">
+                        <!-- Skeleton loaders -->
+                        <div class="skeleton-trailer">
+                            <div class="skeleton skeleton-thumb"></div>
+                            <div class="skeleton-lines">
+                                <div class="skeleton skeleton-line medium"></div>
+                                <div class="skeleton skeleton-line short"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-trailer">
+                            <div class="skeleton skeleton-thumb"></div>
+                            <div class="skeleton-lines">
+                                <div class="skeleton skeleton-line medium"></div>
+                                <div class="skeleton skeleton-line short"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-trailer">
+                            <div class="skeleton skeleton-thumb"></div>
+                            <div class="skeleton-lines">
+                                <div class="skeleton skeleton-line medium"></div>
+                                <div class="skeleton skeleton-line short"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Releases -->
+                <div class="rp-section">
+                    <div class="rp-section-header">
+                        <h3 class="rp-section-title">New Releases</h3>
+                        <button class="rp-see-all">See All</button>
+                    </div>
+                    <div class="rp-new-releases" id="rp-new-releases">
+                        <!-- Skeleton loaders -->
+                        <div class="skeleton-release">
+                            <div class="skeleton skeleton-release-img"></div>
+                            <div class="skeleton-release-lines">
+                                <div class="skeleton skeleton-line medium"></div>
+                                <div class="skeleton skeleton-line short"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-release">
+                            <div class="skeleton skeleton-release-img"></div>
+                            <div class="skeleton-release-lines">
+                                <div class="skeleton skeleton-line medium"></div>
+                                <div class="skeleton skeleton-line short"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-release">
+                            <div class="skeleton skeleton-release-img"></div>
+                            <div class="skeleton-release-lines">
+                                <div class="skeleton skeleton-line medium"></div>
+                                <div class="skeleton skeleton-line short"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CineMatch AI -->
+                <div class="rp-ai-card">
+                    <h4 class="rp-ai-title">
+                        <span class="material-symbols-outlined" style="font-size:16px;">auto_awesome</span> CineMatch AI
+                    </h4>
+                    <p class="rp-ai-desc">Based on your recent watch history, you might enjoy technical sci-fi
+                        thrillers.</p>
+                    <button class="rp-ai-btn">Personalize Recommendations</button>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+
+
+    <!-- Trailer Modal -->
+    <div class="trailer-modal hidden" id="trailer-modal">
+        <div class="trailer-modal-backdrop" id="trailer-modal-backdrop"></div>
+        <div class="trailer-modal-content">
+            <button class="trailer-modal-close" id="trailer-modal-close">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <div class="trailer-iframe-container">
+                <iframe id="trailer-iframe" src="" frameborder="0" allow="autoplay; encrypted-media; fullscreen"
+                    allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- DEBUG OVERLAY (Hidden by default) -->
+    <div id="debug-overlay" class="hidden">
+        <div class="debug-header">
+            <h3>Debug Mode</h3>
+            <button id="close-debug">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="debug-content">
+            <div class="debug-item"><span class="label">Prompt:</span><span class="value" id="debug-prompt">-</span>
+            </div>
+            <div class="debug-item"><span class="label">Mood:</span><span class="value" id="debug-mood">-</span></div>
+            <div class="debug-item"><span class="label">Filters:</span><span class="value" id="debug-filters">-</span>
+            </div>
+            <div class="debug-item"><span class="label">Returned:</span><span class="value" id="debug-count">-</span>
+            </div>
+            <div class="debug-item"><span class="label">Server Status:</span><span class="value"
+                    id="debug-status">Checking...</span></div>
+        </div>
+    </div>
+
+    <!-- Supabase CDN for Real-Time Chat -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Chat Module Scripts -->
+    <script src="/static/supabase-config.js?v=9"></script>
+    <script src="/static/chat.js?v=9"></script>
+
+    <!-- Main App Script -->
+    <script src="/static/app.js?v=29"></script>
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+pydantic
+requests
+google-api-python-client
+python-dotenv
+sentence-transformers
+faiss-cpu
+fastapi
+uvicorn
+email-validator
+aiofiles
