@@ -79,7 +79,7 @@ from fastapi.responses import FileResponse
 
 @app.get("/")
 async def read_index():
-    return FileResponse("static/index.html")
+    return FileResponse("static/index.html", headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
 
 # Catch-all for SPA client-side routing (e.g., /search, /saved, /community, /profile)
 # This must be defined BEFORE api routes to avoid conflicts
@@ -87,9 +87,11 @@ async def read_index():
 @app.get("/saved") 
 @app.get("/community")
 @app.get("/profile")
+@app.get("/trending")
+@app.get("/latest")
 async def spa_routes():
     """Serve index.html for SPA client-side routes."""
-    return FileResponse("static/index.html")
+    return FileResponse("static/index.html", headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
 
 @app.post("/search", response_model=SearchResponse)
 def search_content(

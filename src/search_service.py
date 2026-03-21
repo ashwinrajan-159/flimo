@@ -46,6 +46,10 @@ class SearchService:
             "allowed": ["drama", "romance"],
             "forbidden": ["comedy", "action", "horror", "thriller"]
         },
+        "sad": {
+            "allowed": ["drama", "romance"],
+            "forbidden": ["comedy", "action", "horror", "thriller", "animation"]
+        },
         "thoughtful": {
             "allowed": ["drama", "mystery", "documentary", "biography"],
             "forbidden": ["action", "horror", "comedy"]
@@ -801,7 +805,8 @@ class SearchService:
         target_genres = set(g.lower() for g in (target.genres or []))
         
         # 7. Score each candidate with multi-dimensional similarity
-        results = []
+        contents_list = []
+        scores_list = []
         for i, cid in enumerate(candidates):
             if cid not in content_map:
                 continue
@@ -877,19 +882,17 @@ class SearchService:
             if theme_library and target_tone and tone_score > 0.6:
                 reason_parts.append(f"{target_tone} tone")
                 
-            results.append(SearchResultItem(
-                content_id=c.content_id,
-                title=c.title,
-                content_type=c.content_type.value,
-                thumbnail_url=c.thumbnail_url,
-                rating=c.rating,
-                score=final_score,
-                reason=" • ".join(reason_parts)
-            ))
+            contents_list.append(c)
+            scores_list.append(final_score)
             
-        # 8. Sort by score and return
-        results.sort(key=lambda x: x.score, reverse=True)
-        return results[:limit]
+        # 8. Rank and format through universal ranker
+        ranked_results = self.ranker.rank_results(
+            contents_list,
+            scores_list,
+            query_hint=""
+        )
+        
+        return ranked_results[:limit]
 
     def _calculate_ambiguity(self, parsed, query_text: str) -> float:
         """
@@ -981,6 +984,11 @@ class SearchService:
         
         # Extract mood and genres from request
         mood = request.mood if hasattr(request, 'mood') and request.mood else None
+        
+        # Fallback to detected tone in prompt if user didn't explicitly select a mood filter
+        if not mood and hasattr(parsed, 'emotional_tone') and parsed.emotional_tone:
+            mood = parsed.emotional_tone
+            
         genres = request.genres if hasattr(request, 'genres') and request.genres else None
         
         # Story mode / Anti-Gravity detection
@@ -1227,33 +1235,24 @@ class SearchService:
         # 6. Fetch Details
         contents = get_content_by_ids(candidate_ids_to_fetch)
         
-        # 7. Apply quality gating (Rating & Popularity filter) and convert to Result Items
-        results = []
+        # 7. Apply quality gating (Popularity filter handled here, Rating handled by Ranker)
+        final_candidates = []
+        final_scores = []
+        
         for c in contents:
-            # User constraint: filter like popular and rating
-            # Apply strict quality checking inspired by trending/popular standards
-            rating = c.rating or 0.0
+            # Popularity gate for personalization
             popularity = c.popularity or 0.0
-            
-            if rating < 7.0 or popularity < 10.0:
+            if popularity < 10.0:
                 continue
             
-            # Use content type string correctly depending on enum properties
-            c_type = str(c.content_type.value) if hasattr(c.content_type, 'value') else str(c.content_type)
-            results.append(SearchResultItem(
-                content_id=c.content_id,
-                title=c.title,
-                content_type=c_type,
-                thumbnail_url=c.thumbnail_url,
-                rating=c.rating,
-                popularity=c.popularity,
-                score=distance_map.get(c.content_id, 0.0),
-                reason="Recommended for you"
-            ))
+            final_candidates.append(c)
+            final_scores.append(distance_map.get(c.content_id, 0.0))
             
-        # 8. Sort back by the semantic similarity (distance, lower is better) 
-        # Since DB fetch doesn't preserve VectorStore ranking!
-        results.sort(key=lambda x: x.score)
+        # 8. Route through global ranker to enforce global quality & concept rules
+        ranked_results = self.ranker.rank_results(
+            final_candidates,
+            final_scores,
+            query_hint=""
+        )
         
-        # Finally limit the payload to the requested sizing
-        return results[:limit]
+        return ranked_results[:limit]

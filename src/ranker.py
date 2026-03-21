@@ -13,7 +13,14 @@ COMPOUND_KEYWORDS = {
     "war": ["war", "battle", "military", "soldier", "combat"],
     "superhero": ["superhero", "marvel", "dc", "avengers", "batman", "superman"],
     "mystery": ["mystery", "detective", "crime", "investigation"],
-    "fantasy": ["fantasy", "magic", "wizard", "dragon", "mythical"]
+    "fantasy": ["fantasy", "magic", "wizard", "dragon", "mythical"],
+    "action": ["action", "explosions", "fight", "martial arts", "furious"],
+    "drama": ["drama", "dramatic"],
+    "sci-fi": ["sci-fi", "science fiction", "scifi", "futuristic"],
+    "thriller": ["thriller", "suspense", "tense", "psychological"],
+    "animation": ["animation", "animated", "cartoon", "anime"],
+    "family": ["family", "parent", "child", "kids", "children"],
+    "documentary": ["documentary", "docuseries", "real life"]
 }
 
 # Concept → genre/keyword mapping for content matching
@@ -26,7 +33,14 @@ CONCEPT_CONTENT_MATCH = {
     "war": ["war", "action"],
     "superhero": ["action", "adventure", "superhero"],
     "mystery": ["mystery", "crime", "thriller"],
-    "fantasy": ["fantasy", "adventure"]
+    "fantasy": ["fantasy", "adventure"],
+    "action": ["action", "adventure"],
+    "drama": ["drama"],
+    "sci-fi": ["science fiction", "sci-fi"],
+    "thriller": ["thriller", "horror", "mystery"],
+    "animation": ["animation", "family"],
+    "family": ["family", "animation", "comedy"],
+    "documentary": ["documentary", "history"]
 }
 
 # Role-based concept classification (theme > entity > tone)
@@ -113,7 +127,7 @@ MOOD_PROFILE = {
     },
     "sad": {
         "allowed": ["drama"],
-        "forbidden": ["comedy", "animation", "action"],
+        "forbidden": ["comedy", "animation", "action", "horror", "thriller"],
         "tone_keywords": ["loss", "emotional", "journey", "grief", "tragedy"]
     },
     "dark": {
@@ -133,7 +147,7 @@ MOOD_PROFILE = {
     },
     "emotional": {
         "allowed": ["drama", "romance"],
-        "forbidden": ["comedy", "action", "horror"],
+        "forbidden": ["comedy", "action", "horror", "thriller"],
         "tone_keywords": ["moving", "touching", "relationships", "heartfelt"]
     },
     "inspiring": {
@@ -285,6 +299,16 @@ class Ranker:
         for content, base_sim in zip(contents, similarities):
             cid = content.content_id
             
+            # HARD QUALITY GATE
+            if content.rating is not None and content.rating < MIN_RATING:
+                continue
+                
+            # TAG MATCHING GATE
+            if detected_concepts:
+                has_match = any(self._content_matches_concept(content, concept) for concept in detected_concepts)
+                if not has_match:
+                    continue
+
             # Extract Signals (default to base_sim if explicit signal missing, implies general relevance)
             # In a full vector system, we'd have separate distance metrics. 
             # Here we approximate: if personalization_signals is None, we fall back to generic ranking.

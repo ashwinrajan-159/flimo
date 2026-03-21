@@ -3,15 +3,47 @@ const API_BASE = 'http://127.0.0.1:8000';
 const urlParams = new URLSearchParams(window.location.search);
 const DEBUG_MODE = true; // Force true as per requirements
 
-// Global State
-/* --- 1. ROUTER --- */
 const routes = {
-    "/": { viewId: "view-home", init: initHome, title: "Home" },
-    "/search": { viewId: "view-search", init: initSearch, title: "Explore" },
+    "/": { viewId: "view-home", init: () => { discoverMode = 'popular'; initHome(); syncHomeMode(); }, title: "Home" },
+    "/trending": { viewId: "view-search", init: () => { configureStandaloneGrid('trending'); }, title: "Trending Now" },
+    "/latest": { viewId: "view-search", init: () => { configureStandaloneGrid('latest'); }, title: "New Releases" },
+    "/search": { viewId: "view-search", init: () => { restoreExploreView(); }, title: "Explore" },
     "/saved": { viewId: "view-saved", init: initSaved, title: "Watchlist" },
     "/community": { viewId: "view-community", init: initCommunity, title: "Community" },
     "/profile": { viewId: "view-profile", title: "Profile" }
 };
+
+function configureStandaloneGrid(category) {
+    const topBar = document.querySelector('.search-top-bar');
+    if (topBar) topBar.classList.add('hidden');
+    searchState.category = category;
+    syncSearchCategory();
+    initSearch();
+}
+
+function restoreExploreView() {
+    const topBar = document.querySelector('.search-top-bar');
+    if (topBar) topBar.classList.remove('hidden');
+    searchState.category = 'popular';
+    syncSearchCategory();
+    initSearch();
+}
+
+function syncSearchCategory() {
+    document.querySelectorAll('.category-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.category === searchState.category);
+    });
+}
+
+function syncHomeMode() {
+    document.querySelectorAll('.discover-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === discoverMode);
+    });
+    if (homeInitDone && document.getElementById('discover-results-grid')) {
+        const triggerEvent = new Event('triggerSearchDiscover');
+        window.dispatchEvent(triggerEvent);
+    }
+}
 
 /* --- SAVED MANAGER (Moved to Top for Availability) --- */
 const SavedManager = {
@@ -112,9 +144,10 @@ function handleRoute() {
 window.addEventListener("popstate", handleRoute);
 document.addEventListener("DOMContentLoaded", () => {
     document.body.addEventListener("click", e => {
-        if (e.target.matches("[data-link]")) {
+        const link = e.target.closest("[data-link]");
+        if (link) {
             e.preventDefault();
-            navigateTo(e.target.href);
+            navigateTo(link.href);
         }
     });
     handleRoute();
@@ -165,10 +198,19 @@ async function initRightSidebar() {
             if (res.ok) {
                 const data = await res.json();
                 newReleasesList.innerHTML = data.results.map(item => createRightPanelImageCard(item)).join('');
+                newReleasesList.querySelectorAll('.animate-on-scroll').forEach(el => window.observeElement(el));
             }
         } catch (e) {
             newReleasesList.innerHTML = '<p class="text-muted">Failed to load</p>';
         }
+    }
+
+    const seeAllNrBtn = document.querySelector('.rp-see-all');
+    if (seeAllNrBtn) {
+        seeAllNrBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateTo('/latest');
+        });
     }
 }
 
@@ -206,7 +248,7 @@ function createRightPanelImageCard(item) {
     // We will do a global querySelector after innerHTML replaces the content.
 
     return `
-        <div class="content-card animate-on-scroll" data-id="${item.content_id}" data-type="${item.content_type}" onclick="openDetail('${item.content_id}')">
+        <div class="rp-nr-card animate-on-scroll" data-id="${item.content_id}" data-type="${item.content_type}" onclick="openDetail('${item.content_id}')">
             <img class="rp-nr-img" src="${item.thumbnail_url || 'https://via.placeholder.com/300x170/1A1608/F2CC0D?text=No+Image'}" alt="${item.title}">
             <div class="rp-nr-overlay"></div>
             <div class="rp-nr-content">
@@ -682,6 +724,7 @@ async function loadContinueWatching() {
                 thumbnail_url: item.thumbnail_url, rating: item.rating,
                 content_type: item.content_type, reason: '🕐 Recently viewed'
             })).join('');
+            grid.querySelectorAll('.animate-on-scroll').forEach(el => window.observeElement(el));
             section.classList.remove('hidden');
         } else { section.classList.add('hidden'); }
     } catch (e) {
