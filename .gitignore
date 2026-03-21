@@ -1,1 +1,15 @@
-.aider*
+# env
+.env
+.env.*
+
+# python
+venv/
+__pycache__/
+*.pyc
+
+# logs
+*.log
+
+# editor
+.vscode/
+.idea/
