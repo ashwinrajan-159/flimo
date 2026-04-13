@@ -17,3 +17,5 @@ fastapi
 uvicorn
 email-validator
 aiofiles
+google-auth
+python-jose[cryptography]

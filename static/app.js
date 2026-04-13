@@ -143,6 +143,8 @@ function handleRoute() {
 
 window.addEventListener("popstate", handleRoute);
 document.addEventListener("DOMContentLoaded", () => {
+    initAuth();
+    
     document.body.addEventListener("click", e => {
         const link = e.target.closest("[data-link]");
         if (link) {
@@ -1294,9 +1296,17 @@ function performTextSearch() {
 const AuthManager = {
     getEmail: () => localStorage.getItem('streamai_user_email'),
     setEmail: (email) => localStorage.setItem('streamai_user_email', email),
-    clearEmail: () => localStorage.removeItem('streamai_user_email'),
+    clearEmail: () => {
+        localStorage.removeItem('streamai_user_email');
+        localStorage.removeItem('streamai_jwt_token');
+    },
     isLoggedIn: () => !!localStorage.getItem('streamai_user_email'),
-    getHeader: () => ({ 'x-user-email': localStorage.getItem('streamai_user_email') || '' })
+    getHeader: () => {
+        const headers = { 'x-user-email': localStorage.getItem('streamai_user_email') || '' };
+        const token = localStorage.getItem('streamai_jwt_token');
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        return headers;
+    }
 };
 
 // Current user profile (cached after fetch)
@@ -1305,9 +1315,7 @@ let currentUserProfile = null;
 // Chat refresh interval
 let chatRefreshInterval = null;
 
-function initCommunity() {
-    const loginSection = document.getElementById('community-login');
-    const profileSection = document.getElementById('community-profile');
+function initAuth() {
     const loginModal = document.getElementById('login-modal');
 
     // Check if already logged in
@@ -1344,9 +1352,10 @@ function initCommunity() {
 
     // Edit profile button
     document.getElementById('edit-profile-btn')?.addEventListener('click', handleEditProfile);
+}
 
+function initCommunity() {
     // Initialize Supabase Real-Time Chat (new module)
-    // The chat module is loaded separately and handles its own initialization
     if (window.chatManager && typeof window.chatManager.init === 'function') {
         window.chatManager.init();
     } else if (typeof window.initChat === 'function') {

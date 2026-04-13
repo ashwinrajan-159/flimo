@@ -7,7 +7,7 @@ from .schemas import SearchRequest, SearchResponse, DiscoverRequest, SearchResul
 from .search_service import SearchService
 from .browse_api import router as browse_router
 from .community_api import router as community_router
-from .auth import AuthService
+from .auth import router as auth_router
 from .config import TMDB_API_KEY
 from .monitoring import MonitoringMiddleware, RateLimitMiddleware, METRICS
 from .database import DB_PATH
@@ -48,6 +48,11 @@ app.add_middleware(RateLimitMiddleware, limit=60, window=60)
 
 app.include_router(browse_router)
 app.include_router(community_router)
+app.include_router(auth_router)
+from .user_api import router as user_router
+app.include_router(user_router)
+from .recommendation_api import router as recommendation_router
+app.include_router(recommendation_router)
 
 # Singleton instance
 search_service_instance: Optional[SearchService] = None
@@ -73,7 +78,12 @@ async def startup_event():
         logging.getLogger().addHandler(file_handler)
         
     logger.info("Application startup: Initializing services...")
-    get_search_service()
+    search_svc = get_search_service()
+    
+    # Initialize Recommendation Engine (uses the same VectorStore)
+    from .recommendation_api import initialize_engine
+    initialize_engine(search_svc.vector_store)
+    logger.info("Recommendation Engine initialized.")
 
 from fastapi.responses import FileResponse
 
@@ -96,24 +106,23 @@ async def spa_routes():
 @app.post("/search", response_model=SearchResponse)
 def search_content(
     request: SearchRequest,
-    x_user_email: Optional[str] = Header(None)
+    authorization: Optional[str] = Header(None)
 ):
     """
     Search with optional personalization.
+    If a valid JWT is provided, personalizes results using user history.
     """
     user_id = None
-    if x_user_email:
-        try:
-            auth_service = AuthService()
-            user = auth_service.get_or_create_user(x_user_email)
-            user_id = user.user_id
-        except Exception as e:
-            logger.warning(f"Auth failed for personalization: {e}")
-            
+    if authorization and authorization.startswith("Bearer "):
+        from .core.security import decode_access_token
+        payload = decode_access_token(authorization.split(" ", 1)[1])
+        if payload:
+            user_id = payload.get("user_id")
+
     try:
         if not search_service_instance:
              raise HTTPException(status_code=500, detail="Service not initialized")
-             
+
         results = search_service_instance.search(request, user_id=user_id)
         return SearchResponse(results=results)
     except HTTPException:
@@ -121,6 +130,7 @@ def search_content(
     except Exception as e:
         logger.error(f"Search failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 @app.post("/discover")

@@ -165,6 +165,23 @@ def init_db():
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_history_user ON watched_history(user_id, watched_at DESC)")
     
+    # 10. User Interactions (Recommendation Engine)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_interactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            movie_id TEXT NOT NULL,
+            action_type TEXT NOT NULL CHECK(action_type IN ('like', 'bookmark', 'view')),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, movie_id, action_type),
+            FOREIGN KEY(user_id) REFERENCES users(user_id),
+            FOREIGN KEY(movie_id) REFERENCES content(content_id)
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_interactions_user ON user_interactions(user_id, created_at DESC)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_interactions_movie ON user_interactions(movie_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_interactions_action ON user_interactions(user_id, action_type)")
+    
     conn.commit()
     conn.close()
     logger.info("Database initialized successfully.")

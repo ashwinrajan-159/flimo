@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css?v=12356">
-    <script src="/static/app.js?v=12356" defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -27,7 +27,6 @@
                 </div>
                 <div>
                     <h1 class="sidebar-logo-title">Flimo</h1>
-                    <p class="sidebar-logo-subtitle">Premium Member</p>
                 </div>
             </div>
 
@@ -350,25 +349,6 @@
                     <div class="content-container">
                         <h2 class="page-title">Community</h2>
 
-                        <!-- Login Modal now handles authentication globally -->
-
-                        <!-- Login Modal -->
-                        <div id="login-modal" class="login-modal hidden">
-                            <div class="login-modal-backdrop"></div>
-                            <div class="login-modal-content">
-                                <button class="login-modal-close" id="login-modal-close">
-                                    <span class="material-symbols-outlined">close</span>
-                                </button>
-                                <h3>Join the Community</h3>
-                                <p class="text-muted">Sign in with your email to chat and comment</p>
-                                <div class="login-form">
-                                    <input type="email" id="login-email" class="login-input"
-                                        placeholder="your@email.com">
-                                    <button class="btn-primary" id="login-btn">Sign In</button>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Global Chat -->
                         <section class="content-section" style="margin-top: -0.5rem;">
                             <h3 class="section-heading">
@@ -644,21 +624,46 @@
                     </div>
                 </div>
 
-                <!-- CineMatch AI -->
-                <div class="rp-ai-card">
-                    <h4 class="rp-ai-title">
-                        <span class="material-symbols-outlined" style="font-size:16px;">auto_awesome</span> CineMatch AI
-                    </h4>
-                    <p class="rp-ai-desc">Based on your recent watch history, you might enjoy technical sci-fi
-                        thrillers.</p>
-                    <button class="rp-ai-btn">Personalize Recommendations</button>
-                </div>
+
             </div>
         </aside>
 
     </div>
 
 
+
+    <!-- Global Login Modal (top-level overlay, works from any page) -->
+    <div id="login-modal" class="login-modal hidden">
+        <div class="login-modal-backdrop"></div>
+        <div class="login-modal-content">
+            <button class="login-modal-close" id="login-modal-close">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <h3>Join the Community</h3>
+            <p class="text-muted">Sign in securely with Google to chat and comment</p>
+            <div class="login-form" style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 1rem;">
+                <div id="g_id_onload"
+                     data-client_id="1003095348530-vn8e3fjrbpo9b6ubfohicrij5ckbg8hn.apps.googleusercontent.com"
+                     data-context="signin"
+                     data-ux_mode="popup"
+                     data-callback="handleCredentialResponse"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-shape="pill"
+                     data-theme="filled_black"
+                     data-text="signin_with"
+                     data-size="large"
+                     data-logo_alignment="left">
+                </div>
+                <span class="text-muted" style="margin: 0; padding: 0;">or</span>
+                <input type="email" id="login-email" class="login-input"
+                    placeholder="your@email.com (Legacy)">
+                <button class="btn-primary" id="login-btn">Sign In</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Trailer Modal -->
     <div class="trailer-modal hidden" id="trailer-modal">
@@ -703,7 +708,44 @@
     <script src="/static/chat.js?v=9"></script>
 
     <!-- Main App Script -->
-    <script src="/static/app.js?v=29"></script>
+    <script src="/static/app.js?v=30"></script>
+    <script>
+        window.handleCredentialResponse = async function(response) {
+            try {
+                const res = await fetch('/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: response.credential })
+                });
+                
+                if (!res.ok) throw new Error('Auth failed');
+                
+                const data = await res.json();
+                
+                // Decode JWT to get profile info
+                localStorage.setItem('streamai_jwt_token', data.access_token);
+                
+                // For legacy compatibility, parse the payload.
+                const base64Url = data.access_token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                
+                const payload = JSON.parse(jsonPayload);
+                localStorage.setItem('streamai_user_email', payload.email);
+                
+                // Close modal and set user
+                document.getElementById('login-modal').classList.add('hidden');
+                document.body.classList.remove('modal-open');
+                
+                location.reload(); // Quick explicit reload for newly authenticated state
+            } catch (error) {
+                console.error('Google Sign-In Error:', error);
+                alert('Authentication failed.');
+            }
+        };
+    </script>
 </body>
 
 </html>

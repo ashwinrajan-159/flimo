@@ -76,10 +76,22 @@ pip install -r requirements.txt
 ```
 
 ### 4️⃣ Configuration
-Create a `.env` file in the root of the project and add your API keys:
+Create a `.env` file in the root of the project and add your configurations:
 ```env
+# API Keys for Ingestion
 TMDB_API_KEY=your_tmdb_api_key_here
 YOUTUBE_API_KEY=your_youtube_api_key_here
+
+# Deployment Environment (development/production)
+ENV=production
+
+# Logging Level (INFO/DEBUG/WARNING/ERROR)
+LOG_LEVEL=INFO
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+JWT_SECRET=a_very_secure_randomly_generated_secret_string
+JWT_EXPIRE_MINUTES=1440
 ```
 
 ---
