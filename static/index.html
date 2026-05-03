@@ -12,7 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css?v=12356">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -640,26 +639,17 @@
                 <span class="material-symbols-outlined">close</span>
             </button>
             <h3>Join the Community</h3>
-            <p class="text-muted">Sign in securely with Google to chat and comment</p>
+            <p class="text-muted">Sign in to chat, comment, and personalize your experience</p>
             <div class="login-form" style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 1rem;">
-                <div id="g_id_onload"
-                     data-client_id="1003095348530-vn8e3fjrbpo9b6ubfohicrij5ckbg8hn.apps.googleusercontent.com"
-                     data-context="signin"
-                     data-ux_mode="popup"
-                     data-callback="handleCredentialResponse"
-                     data-auto_prompt="false">
-                </div>
-                <div class="g_id_signin"
-                     data-type="standard"
-                     data-shape="pill"
-                     data-theme="filled_black"
-                     data-text="signin_with"
-                     data-size="large"
-                     data-logo_alignment="left">
-                </div>
-                <span class="text-muted" style="margin: 0; padding: 0;">or</span>
+                <!-- Cognito Login Button (shown when configured) -->
+                <button class="btn-primary" id="cognito-login-btn" style="width: 100%; display: none;" onclick="window.location.href='/auth/login'">
+                    <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">lock</span>
+                    Sign in with AWS Cognito
+                </button>
+                <!-- Dev Login (always available) -->
+                <span class="text-muted" id="login-divider" style="margin: 0; padding: 0; display: none;">or use email (dev mode)</span>
                 <input type="email" id="login-email" class="login-input"
-                    placeholder="your@email.com (Legacy)">
+                    placeholder="your@email.com">
                 <button class="btn-primary" id="login-btn">Sign In</button>
             </div>
         </div>
@@ -700,51 +690,27 @@
         </div>
     </div>
 
-    <!-- Supabase CDN for Real-Time Chat -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- Chat Module Scripts -->
-    <script src="/static/supabase-config.js?v=9"></script>
-    <script src="/static/chat.js?v=9"></script>
+    <!-- Chat Module Script (no Supabase dependency) -->
+    <script src="/static/chat.js?v=10"></script>
 
     <!-- Main App Script -->
-    <script src="/static/app.js?v=30"></script>
+    <script src="/static/app.js?v=31"></script>
     <script>
-        window.handleCredentialResponse = async function(response) {
+        // Check auth config on load to show/hide Cognito button
+        (async function() {
             try {
-                const res = await fetch('/auth/google', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: response.credential })
-                });
-                
-                if (!res.ok) throw new Error('Auth failed');
-                
-                const data = await res.json();
-                
-                // Decode JWT to get profile info
-                localStorage.setItem('streamai_jwt_token', data.access_token);
-                
-                // For legacy compatibility, parse the payload.
-                const base64Url = data.access_token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                
-                const payload = JSON.parse(jsonPayload);
-                localStorage.setItem('streamai_user_email', payload.email);
-                
-                // Close modal and set user
-                document.getElementById('login-modal').classList.add('hidden');
-                document.body.classList.remove('modal-open');
-                
-                location.reload(); // Quick explicit reload for newly authenticated state
-            } catch (error) {
-                console.error('Google Sign-In Error:', error);
-                alert('Authentication failed.');
-            }
-        };
+                const res = await fetch('/auth/config');
+                if (res.ok) {
+                    const config = await res.json();
+                    if (config.cognito_configured) {
+                        const cognitoBtn = document.getElementById('cognito-login-btn');
+                        const divider = document.getElementById('login-divider');
+                        if (cognitoBtn) cognitoBtn.style.display = 'block';
+                        if (divider) divider.style.display = 'block';
+                    }
+                }
+            } catch(e) { /* Server not ready yet, fine */ }
+        })();
     </script>
 </body>
 

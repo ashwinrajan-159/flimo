@@ -132,7 +132,7 @@ def get_recommendations(
                     + 0.1 × recency (newer movies boosted)
     
     Modes:
-    - content: Pure content-based (user vector → FAISS → hybrid rank)
+    - content: Pure content-based (user vector -> FAISS -> hybrid rank)
     - collaborative: Movies liked by similar users
     - hybrid: Merged results from both, de-duplicated
     

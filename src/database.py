@@ -624,7 +624,7 @@ def search_by_intent(tags: List[str], quality_threshold: float = 7.0, limit: int
     return _rows_to_content(rows)
 
 
-# MOOD → Genre mapping for filtering
+# MOOD ??? Genre mapping for filtering
 MOOD_GENRE_MAP = {
     "happy": ["adventure", "comedy", "family", "animation"],
     "dark": ["horror", "thriller", "crime", "mystery"],
@@ -648,7 +648,7 @@ def discover_content(mode: str = "popular", mood: str = None, genres: list = Non
     conditions = ["content_type IN ('movie', 'series')", f"rating >= {quality_threshold}"]
     params = []
     
-    # Mood filter → hard genre gate
+    # Mood filter ??? hard genre gate
     if mood and mood.lower() in MOOD_GENRE_MAP:
         mood_genres = MOOD_GENRE_MAP[mood.lower()]
         genre_conditions = []

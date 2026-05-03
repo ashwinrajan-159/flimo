@@ -1292,19 +1292,36 @@ function performTextSearch() {
 
 /* --- 5. COMMUNITY LOGIC --- */
 
-// Auth Manager - handles login state
+// Auth Manager - handles login state (supports both Cognito JWT and dev login)
 const AuthManager = {
-    getEmail: () => localStorage.getItem('streamai_user_email'),
-    setEmail: (email) => localStorage.setItem('streamai_user_email', email),
-    clearEmail: () => {
+    getEmail: () => localStorage.getItem('flimo_user_email') || localStorage.getItem('streamai_user_email'),
+    getToken: () => localStorage.getItem('flimo_jwt_token') || localStorage.getItem('streamai_jwt_token'),
+    getUserId: () => localStorage.getItem('flimo_user_id'),
+    getUserName: () => localStorage.getItem('flimo_user_name'),
+    setAuth: (token, email, name, userId) => {
+        localStorage.setItem('flimo_jwt_token', token);
+        localStorage.setItem('flimo_user_email', email);
+        if (name) localStorage.setItem('flimo_user_name', name);
+        if (userId) localStorage.setItem('flimo_user_id', userId);
+        // Legacy compat
+        localStorage.setItem('streamai_user_email', email);
+        localStorage.setItem('streamai_jwt_token', token);
+    },
+    clearAuth: () => {
+        localStorage.removeItem('flimo_jwt_token');
+        localStorage.removeItem('flimo_user_email');
+        localStorage.removeItem('flimo_user_name');
+        localStorage.removeItem('flimo_user_id');
         localStorage.removeItem('streamai_user_email');
         localStorage.removeItem('streamai_jwt_token');
     },
-    isLoggedIn: () => !!localStorage.getItem('streamai_user_email'),
+    isLoggedIn: () => !!AuthManager.getToken(),
     getHeader: () => {
-        const headers = { 'x-user-email': localStorage.getItem('streamai_user_email') || '' };
-        const token = localStorage.getItem('streamai_jwt_token');
+        const headers = {};
+        const token = AuthManager.getToken();
         if (token) headers['Authorization'] = `Bearer ${token}`;
+        const email = AuthManager.getEmail();
+        if (email) headers['x-user-email'] = email;
         return headers;
     }
 };
@@ -1376,30 +1393,39 @@ async function handleLogin() {
         return;
     }
 
-    AuthManager.setEmail(email);
-
-    // Fetch/create profile
+    // Use dev login endpoint to get a proper JWT
     try {
-        const res = await fetch(`${API_BASE}/profile`, {
-            headers: { ...AuthManager.getHeader() }
+        const res = await fetch(`${API_BASE}/auth/dev`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
         });
-        if (res.ok) {
-            currentUserProfile = await res.json();
-            // Close the login modal
-            document.getElementById('login-modal')?.classList.add('hidden');
-            showLoggedInState();
-        } else {
-            throw new Error('Profile fetch failed');
-        }
+
+        if (!res.ok) throw new Error('Dev login failed');
+
+        const data = await res.json();
+        AuthManager.setAuth(
+            data.access_token,
+            data.user?.email || email,
+            data.user?.name || email.split('@')[0],
+            data.user?.user_id
+        );
+
+        // Close the login modal
+        document.getElementById('login-modal')?.classList.add('hidden');
+        showLoggedInState();
+
+        // Fetch profile
+        fetchAndDisplayProfile();
     } catch (e) {
         console.error('Login failed:', e);
-        AuthManager.clearEmail();
+        AuthManager.clearAuth();
         alert('Login failed. Please try again.');
     }
 }
 
 function handleLogout() {
-    AuthManager.clearEmail();
+    AuthManager.clearAuth();
     currentUserProfile = null;
     showLoggedOutState();
 

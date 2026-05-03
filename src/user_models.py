@@ -6,7 +6,7 @@ class User(BaseModel):
     user_id: str
     email: str
     created_at: Optional[datetime] = None
-    google_id: Optional[str] = None
+    cognito_sub: Optional[str] = None
     name: Optional[str] = None
     profile_pic: Optional[str] = None
 

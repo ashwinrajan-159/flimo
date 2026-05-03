@@ -78,6 +78,92 @@ async def startup_event():
         logging.getLogger().addHandler(file_handler)
         
     logger.info("Application startup: Initializing services...")
+    
+    # --- Create community tables if they don't exist ---
+    import sqlite3
+    conn = sqlite3.connect(str(DB_PATH))
+    cursor = conn.cursor()
+    
+    cursor.executescript("""
+        CREATE TABLE IF NOT EXISTS users (
+            user_id TEXT PRIMARY KEY,
+            email TEXT UNIQUE NOT NULL,
+            cognito_sub TEXT,
+            name TEXT,
+            profile_pic TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        
+        CREATE TABLE IF NOT EXISTS user_profiles (
+            user_id TEXT PRIMARY KEY,
+            display_name TEXT,
+            avatar_color TEXT DEFAULT '#3B82F6',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            message_id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            message TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        
+        CREATE TABLE IF NOT EXISTS content_comments (
+            comment_id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            content_id TEXT NOT NULL,
+            comment_text TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        
+        CREATE TABLE IF NOT EXISTS likes (
+            user_id TEXT NOT NULL,
+            content_id TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (user_id, content_id)
+        );
+        
+        CREATE TABLE IF NOT EXISTS reviews (
+            review_id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            content_id TEXT NOT NULL,
+            rating INTEGER NOT NULL,
+            review_text TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        
+        CREATE TABLE IF NOT EXISTS watchlists (
+            watchlist_id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        
+        CREATE TABLE IF NOT EXISTS watchlist_items (
+            watchlist_id TEXT NOT NULL,
+            content_id TEXT NOT NULL,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (watchlist_id, content_id)
+        );
+        
+        CREATE TABLE IF NOT EXISTS watch_history (
+            user_id TEXT NOT NULL,
+            content_id TEXT NOT NULL,
+            progress REAL DEFAULT 0,
+            last_watched TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (user_id, content_id)
+        );
+        
+        CREATE INDEX IF NOT EXISTS idx_chat_messages_time ON chat_messages(created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_content_comments_content ON content_comments(content_id, created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    """)
+    
+    conn.commit()
+    conn.close()
+    logger.info("Community tables initialized.")
+    
     search_svc = get_search_service()
     
     # Initialize Recommendation Engine (uses the same VectorStore)

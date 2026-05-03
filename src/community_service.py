@@ -370,23 +370,12 @@ class CommunityService:
         conn = sqlite3.connect(str(DB_PATH))
         cursor = conn.cursor()
         
-        # Check if exists to update progress/timestamp
-        cursor.execute(
-            "SELECT history_id FROM watched_history WHERE user_id = ? AND content_id = ?",
-            (user_id, content_id)
-        )
-        row = cursor.fetchone()
-        
-        if row:
-            cursor.execute(
-                "UPDATE watched_history SET watched_at = CURRENT_TIMESTAMP, progress = ? WHERE history_id = ?",
-                (progress, row[0])
-            )
-        else:
-            cursor.execute(
-                "INSERT INTO watched_history (user_id, content_id, progress) VALUES (?, ?, ?)",
-                (user_id, content_id, progress)
-            )
+        cursor.execute("""
+            INSERT INTO watch_history (user_id, content_id, progress, last_watched)
+            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(user_id, content_id)
+            DO UPDATE SET progress = ?, last_watched = CURRENT_TIMESTAMP
+        """, (user_id, content_id, progress, progress))
         
         conn.commit()
         conn.close()
@@ -397,7 +386,10 @@ class CommunityService:
         conn = sqlite3.connect(str(DB_PATH))
         cursor = conn.cursor()
         
-        cursor.execute("SELECT content_id, watched_at, progress FROM watched_history WHERE user_id = ? ORDER BY watched_at DESC LIMIT ?", (user_id, limit))
+        cursor.execute(
+            "SELECT content_id, last_watched, progress FROM watch_history WHERE user_id = ? ORDER BY last_watched DESC LIMIT ?",
+            (user_id, limit)
+        )
         rows = cursor.fetchall()
         conn.close()
         

@@ -201,14 +201,14 @@ class SearchService:
         # Check FORBIDDEN genres first (hard fail)
         for forbidden in gate.get("forbidden", []):
             if any(forbidden in g for g in content_genres_lower):
-                return False  # HAS forbidden genre → DISCARD
+                return False  # HAS forbidden genre -> DISCARD
         
         # Check ALLOWED genres (must have at least one)
         for allowed in gate.get("allowed", []):
             if any(allowed in g for g in content_genres_lower):
-                return True  # HAS allowed genre → PASS
+                return True  # HAS allowed genre -> PASS
         
-        return False  # No allowed genre found → DISCARD
+        return False  # No allowed genre found -> DISCARD
     
     def _passes_genre_gate(self, content, genres: list) -> bool:
         """
@@ -225,7 +225,7 @@ class SearchService:
             if any(selected.lower() in g for g in content_genres_lower):
                 return True
         
-        return False  # No matching genre → DISCARD
+        return False  # No matching genre -> DISCARD
     
     def _passes_all_gates(self, content, mood: str = None, genres: list = None) -> dict:
         """
@@ -545,11 +545,11 @@ class SearchService:
         if len(tokens) > 5:
             return False
         
-        # Contains genre/movie words → probably thematic
+        # Contains genre/movie words -> probably thematic
         if any(w.lower() in self.GENRE_WORDS for w in tokens):
             return False
         
-        # Single word that's a genre → not a title
+        # Single word that's a genre -> not a title
         if len(tokens) == 1 and self._looks_like_genre(query):
             return False
         
@@ -567,7 +567,7 @@ class SearchService:
         SEMANTIC-FIRST architecture. ALL queries go through semantic search.
         Title matching only supplements semantic results — never replaces them.
         """
-        # ALL queries → semantic (title/genre matching handled as supplements)
+        # ALL queries -> semantic (title/genre matching handled as supplements)
         return "semantic"
         
     def search(self, request: SearchRequest, user_id: Optional[str] = None) -> List[SearchResultItem]:
@@ -608,8 +608,8 @@ class SearchService:
     def _search_exact_title(self, query: str, request: SearchRequest) -> List[SearchResultItem]:
         """
         4-LAYER INTENT-AWARE SEARCH:
-        Layer 1: Fuzzy normalization (vengers → avengers)
-        Layer 2: Intent detection (marvel → MCU universe)
+        Layer 1: Fuzzy normalization (vengers -> avengers)
+        Layer 2: Intent detection (marvel -> MCU universe)
         Layer 3: Quality-gated search (rating >= 7.0)
         Layer 4: Intent-aware ranking
         Layer 5: Mood + Genre gates (STRICT AND LOGIC)
@@ -617,14 +617,14 @@ class SearchService:
         # LAYER 1: Fuzzy normalization
         normalized_query = self.intent_resolver.normalize_query(query)
         if normalized_query != query.lower():
-            logger.info(f"[LAYER 1] Fuzzy normalized: '{query}' → '{normalized_query}'")
+            logger.info(f"[LAYER 1] Fuzzy normalized: '{query}' -> '{normalized_query}'")
         
         # LAYER 2: Intent detection
         intent_name, intent_data = self.intent_resolver.detect_intent(normalized_query)
         self.last_detected_intent = intent_name
         
         if intent_data:
-            logger.info(f"[LAYER 2] Detected intent: {intent_name} → tags: {intent_data.get('tags', [])}")
+            logger.info(f"[LAYER 2] Detected intent: {intent_name} -> tags: {intent_data.get('tags', [])}")
             
             # LAYER 3+4: Intent-aware quality search
             tags = intent_data.get("tags", [normalized_query])
@@ -643,7 +643,7 @@ class SearchService:
                     if self._passes_mood_gate(c, mood) and self._passes_genre_gate(c, genres):
                         filtered_contents.append(c)
                 
-                logger.info(f"[LAYER 5] Mood/genre gates: {len(contents)} → {len(filtered_contents)}")
+                logger.info(f"[LAYER 5] Mood/genre gates: {len(contents)} -> {len(filtered_contents)}")
                 
                 # Convert to SearchResultItems with quality-based scoring
                 results = []
@@ -682,7 +682,7 @@ class SearchService:
             if self._passes_mood_gate(c, mood) and self._passes_genre_gate(c, genres):
                 filtered_contents.append(c)
         
-        logger.info(f"[GATES] Title search: {len(contents)} → {len(filtered_contents)} after mood/genre gates")
+        logger.info(f"[GATES] Title search: {len(contents)} -> {len(filtered_contents)} after mood/genre gates")
         
         if not filtered_contents:
             # If no results pass gates, fallback to semantic
@@ -724,7 +724,7 @@ class SearchService:
             if self._passes_mood_gate(c, mood) and self._passes_genre_gate(c, genres):
                 filtered_contents.append(c)
         
-        logger.info(f"[GATES] Genre browse: {len(contents)} → {len(filtered_contents)} after mood/genre gates")
+        logger.info(f"[GATES] Genre browse: {len(contents)} -> {len(filtered_contents)} after mood/genre gates")
         
         if not filtered_contents:
             # Fallback to semantic if no results pass gates
@@ -973,7 +973,7 @@ class SearchService:
         # 5. Fetch Content Details
         contents = get_content_by_ids(candidates_ids)
         
-        # Build lookup map: content_id → UnifiedContent
+        # Build lookup map: content_id -> UnifiedContent
         content_map = {c.content_id: c for c in contents}
         
         # Initialize gate tracking
@@ -1063,7 +1063,7 @@ class SearchService:
             "antigravity_gate": gate_stats["antigravity"],
             "final": len(final_candidates)
         }
-        logger.info(f"[PIPELINE] SBERT={sbert_count} → Quality={gate_stats['quality']} → Mood={gate_stats['mood']} → Genre={gate_stats['genre']} → AntiGravity={gate_stats['antigravity']} → Final={len(final_candidates)}")
+        logger.info(f"[PIPELINE] SBERT={sbert_count} -> Quality={gate_stats['quality']} -> Mood={gate_stats['mood']} -> Genre={gate_stats['genre']} -> AntiGravity={gate_stats['antigravity']} -> Final={len(final_candidates)}")
         
         # 7. Rank (Weighted Score) - with mood-aware quality scoring
         detected_concepts = self.ranker.detect_concepts(request.base_prompt)

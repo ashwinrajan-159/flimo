@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
+from typing import List, Optional
 from .user_models import User, LikeRequest, ReviewRequest, ReviewResponse, WatchlistCreate, WatchlistAddItem, WatchlistResponse
 from .auth import get_current_user
 from .community_service import CommunityService
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["community"])
 service = CommunityService()
@@ -49,10 +53,6 @@ def add_to_watchlist(watchlist_id: str, content_id: str, user: User = Depends(ge
 
 @router.get("/watchlist/{user_id}", response_model=List[WatchlistResponse])
 def get_user_watchlists(user_id: str):
-    # Depending on privacy rules, this might need checks.
-    # Plan says "Watchlists are private by default (public flag optional)".
-    # For now, allow viewing if it matches current user OR if we implement public flag later.
-    # To keep it simple per plan: return list.
     return service.get_watchlists(user_id)
 
 # --- Profile Endpoints ---
@@ -70,16 +70,20 @@ def update_profile(request: ProfileUpdateRequest, user: User = Depends(get_curre
     service.update_profile(user.user_id, request.display_name, request.avatar_color)
     return service.get_profile(user.user_id, user.email)
 
-# --- Chat Endpoints ---
+# --- Chat Endpoints (NO AUTH REQUIRED FOR READ) ---
 
 @router.get("/chat", response_model=List[ChatMessageResponse])
 def get_chat_messages(limit: int = 50):
-    """Get recent global chat messages."""
-    return service.get_chat_messages(limit)
+    """Get recent global chat messages. No auth required."""
+    try:
+        return service.get_chat_messages(limit)
+    except Exception as e:
+        logger.error(f"Failed to load chat messages: {e}")
+        return []  # Return empty list instead of error
 
 @router.post("/chat", response_model=ChatMessageResponse, status_code=status.HTTP_201_CREATED)
 def send_chat_message(request: ChatMessageRequest, user: User = Depends(get_current_user)):
-    """Send a global chat message."""
+    """Send a global chat message. Auth required."""
     return service.add_chat_message(user.user_id, request.message)
 
 # --- Comment Endpoints ---
@@ -87,7 +91,11 @@ def send_chat_message(request: ChatMessageRequest, user: User = Depends(get_curr
 @router.get("/comments/{content_id}", response_model=List[CommentResponse])
 def get_content_comments(content_id: str, limit: int = 50):
     """Get comments for a specific content item."""
-    return service.get_comments(content_id, limit)
+    try:
+        return service.get_comments(content_id, limit)
+    except Exception as e:
+        logger.error(f"Failed to load comments for {content_id}: {e}")
+        return []
 
 @router.post("/comments/{content_id}", response_model=CommentResponse, status_code=status.HTTP_201_CREATED)
 def add_content_comment(content_id: str, request: CommentRequest, user: User = Depends(get_current_user)):

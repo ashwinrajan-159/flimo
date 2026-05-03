@@ -23,7 +23,7 @@ COMPOUND_KEYWORDS = {
     "documentary": ["documentary", "docuseries", "real life"]
 }
 
-# Concept → genre/keyword mapping for content matching
+# Concept -> genre/keyword mapping for content matching
 CONCEPT_CONTENT_MATCH = {
     "space": ["science fiction", "sci-fi", "space", "alien"],
     "robot": ["robot", "ai", "android", "droid", "cyborg"],

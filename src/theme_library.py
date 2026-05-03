@@ -316,7 +316,7 @@ class ThemeLibrary:
             
         if enrichment_terms:
             enriched = f"{query}, {', '.join(enrichment_terms)}"
-            logger.debug(f"Enriched query: '{query}' → '{enriched}'")
+            logger.debug(f"Enriched query: '{query}' -> '{enriched}'")
             return enriched
             
         return query

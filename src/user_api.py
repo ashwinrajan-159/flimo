@@ -7,7 +7,7 @@ from .auth import get_current_user
 from .user_models import User
 from .database import DB_PATH
 
-router = APIRouter()
+router = APIRouter(prefix="/api", tags=["user-interactions"])
 
 def get_db():
     conn = sqlite3.connect(str(DB_PATH), check_same_thread=False)

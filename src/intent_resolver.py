@@ -28,7 +28,7 @@ KNOWN_ENTITIES = {
     "action": ["action", "acton"],
 }
 
-# LAYER 2: Intent mapping (entity → SPECIFIC title patterns for DB search)
+# LAYER 2: Intent mapping (entity -> SPECIFIC title patterns for DB search)
 # These tags are matched against TITLE, not description - for precision
 INTENT_MAP = {
     "marvel": {
@@ -107,7 +107,7 @@ class IntentResolver:
     def normalize_query(self, query: str) -> str:
         """
         LAYER 1: Fuzzy normalization
-        Fixes typos: vengers → avengers, marvl → marvel
+        Fixes typos: vengers -> avengers, marvl -> marvel
         """
         query_lower = query.lower().strip()
         
