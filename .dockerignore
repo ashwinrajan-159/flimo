@@ -1,0 +1,39 @@
+# Virtual environments
+.venv/
+venv/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Environment files (injected at runtime)
+.env
+.env.*
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Docker files (don't need to be in context)
+docker-compose.yml
+
+# Tests
+tests/
+
+# Misc
+README.md
+page.html
+ingestion.log

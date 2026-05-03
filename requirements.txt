@@ -1,21 +1,22 @@
+# Core framework
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+pydantic>=2.0.0
 
+# ML / Vector Search
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.4
+numpy>=1.24.0
 
+# Authentication
+python-jose[cryptography]>=3.3.0
 
+# Database & Utils
+aiofiles>=23.0.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+email-validator>=2.0.0
 
-
-
-
-
-
-pydantic
-requests
-google-api-python-client
-python-dotenv
-sentence-transformers
-faiss-cpu
-fastapi
-uvicorn
-email-validator
-aiofiles
-google-auth
-python-jose[cryptography]
+# External APIs (ingestion only — not needed at runtime but kept for convenience)
+google-api-python-client>=2.0.0
+google-auth>=2.0.0

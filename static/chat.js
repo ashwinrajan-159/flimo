@@ -13,8 +13,8 @@
 
 class ChatManager {
     constructor() {
-        // Configuration
-        this.API_BASE = 'http://127.0.0.1:8000';
+        // Configuration — use relative URL so it works on any host
+        this.API_BASE = '';
         this.RATE_LIMIT_MS = 1000;
         this.MAX_MESSAGE_LENGTH = 500;
         this.POLL_INTERVAL_MS = 3000;

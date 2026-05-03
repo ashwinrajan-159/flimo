@@ -1,18 +1,29 @@
 version: '3.8'
 
 services:
-  api:
+  flimo:
     build: .
+    container_name: flimo-app
     ports:
       - "8000:8000"
     volumes:
+      # Persistent data: SQLite DB + FAISS index
       - ./data:/app/data
+      # Persistent logs
       - ./logs:/app/logs
     env_file:
       - .env
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 60s  # ML model takes time to load
+    # Resource limits (adjust based on your EC2 instance)
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G

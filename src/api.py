@@ -172,6 +172,21 @@ async def startup_event():
     logger.info("Recommendation Engine initialized.")
 
 from fastapi.responses import FileResponse
+import time
+
+_startup_time = time.time()
+
+@app.get("/health")
+async def health_check():
+    """Health check for Docker, ALB, and monitoring."""
+    uptime = int(time.time() - _startup_time)
+    status = {
+        "status": "healthy",
+        "uptime_seconds": uptime,
+        "search_engine": search_service_instance is not None,
+        "database": os.path.exists(str(DB_PATH)),
+    }
+    return status
 
 @app.get("/")
 async def read_index():
@@ -272,9 +287,6 @@ def discover_content_endpoint(request: DiscoverRequest):
 
 
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
 
 @app.get("/ready")
 def ready():

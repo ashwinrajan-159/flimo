@@ -1,26 +1,42 @@
-# Use official Python runtime as a parent image
-FROM python:3.10-slim
+# --- Stage 1: Build dependencies ---
+FROM python:3.10-slim AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies (if any are needed for libraries like numpy/faiss)
-# faiss-cpu usually has wheels, so system deps might be minimal.
-# But sometimes build-essential is needed. Keeping it slim for now.
+# Install system deps for faiss-cpu and numpy
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first to leverage Docker cache
 COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-# Install python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# --- Stage 2: Production image ---
+FROM python:3.10-slim
 
-# Copy the rest of the application
+WORKDIR /app
+
+# Copy installed packages from builder
+COPY --from=builder /install /usr/local
+
+# Copy application code
 COPY src/ src/
-# Note: we don't copy data/ or logs/ as those should be volumes
-# But we might want to copy config files if they exist outside src
+COPY static/ static/
+
+# Create directories for runtime data
+RUN mkdir -p /app/data /app/logs
+
+# data/ is mounted as a volume (contains content.db, vectors.faiss, id_map.pkl)
+# logs/ is mounted as a volume
 
 # Expose port
 EXPOSE 8000
 
-# Run the application
-CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+
+# Run with production settings
+# Workers = (2 * CPU_cores) + 1 for CPU-bound FAISS workloads
+# Use --workers 1 because FAISS index + ML model are loaded per-worker (memory heavy)
+CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--log-level", "info"]
