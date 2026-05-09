@@ -20,6 +20,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 30m
           script: |
             set -e
 
@@ -28,14 +29,17 @@ jobs:
             echo ">>> Pulling latest code"
             git pull origin main
 
+            echo ">>> Cleaning up disk before build"
+            docker image prune -f
+
             echo ">>> Building new Docker image"
-            docker compose build --no-cache
+            docker compose build
 
             echo ">>> Starting new container (zero-downtime swap)"
             docker compose up -d --remove-orphans
 
             echo ">>> Waiting for health check"
-            sleep 10
+            sleep 15
             curl -f http://localhost:8000/health || (echo "Health check failed!" && exit 1)
 
             echo ">>> Cleaning up old images"
