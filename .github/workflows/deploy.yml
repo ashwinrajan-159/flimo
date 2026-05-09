@@ -39,7 +39,7 @@ jobs:
             docker compose up -d --remove-orphans
 
             echo ">>> Waiting for health check"
-            sleep 15
+            sleep 45
             curl -f http://localhost:8000/health || (echo "Health check failed!" && exit 1)
 
             echo ">>> Cleaning up old images"
