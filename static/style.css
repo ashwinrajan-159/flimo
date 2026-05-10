@@ -185,40 +185,249 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 
 /* --- Left Sidebar --- */
 .sidebar {
-    width: 256px;
-    border-right: 1px solid var(--border-subtle);
+    width: 260px;
+    border-right: 1px solid rgba(242, 204, 13, 0.08);
     display: flex;
     flex-direction: column;
-    background-color: var(--bg-dark);
+    background: linear-gradient(180deg, rgba(26, 22, 8, 0.97) 0%, rgba(20, 16, 4, 0.99) 100%);
+    backdrop-filter: blur(20px);
     flex-shrink: 0;
     z-index: 50;
+    transition: width 0.35s var(--ease-out-quint), transform 0.35s var(--ease-out-quint);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Subtle inner glow on the right edge */
+.sidebar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 0%, rgba(242, 204, 13, 0.15) 30%, rgba(242, 204, 13, 0.15) 70%, transparent 100%);
+    pointer-events: none;
+}
+
+/* Mobile hamburger button (hidden on desktop) */
+.mobile-menu-btn {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 60;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(26, 22, 8, 0.95);
+    border: 1px solid rgba(242, 204, 13, 0.2);
+    color: var(--primary);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    transition: all 0.2s;
+}
+
+.mobile-menu-btn:hover {
+    background: rgba(242, 204, 13, 0.15);
+    border-color: rgba(242, 204, 13, 0.4);
+    transform: scale(1.05);
+}
+
+/* Mobile overlay */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 45;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.visible {
+    opacity: 1;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 52px;
+    border-top: 1px solid rgba(242, 204, 13, 0.06);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out-quint);
+    flex-shrink: 0;
+    background: transparent;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.sidebar-toggle-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(242, 204, 13, 0.08) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.sidebar-toggle-btn:hover {
+    color: var(--primary);
+}
+
+.sidebar-toggle-btn:hover::before {
+    opacity: 1;
+}
+
+.sidebar-toggle-icon {
+    font-size: 20px;
+    transition: transform 0.4s var(--ease-out-quint);
+    position: relative;
+    z-index: 1;
+}
+
+/* --- Collapsed Sidebar State --- */
+.sidebar.collapsed {
+    width: 72px;
+}
+
+.sidebar.collapsed .sidebar-toggle-icon {
+    transform: rotate(180deg);
+}
+
+.sidebar.collapsed .sidebar-logo-title,
+.sidebar.collapsed .sidebar-logo-subtitle {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: opacity 0.15s ease, width 0.35s var(--ease-out-quint);
+}
+
+.sidebar.collapsed .sidebar-logo {
+    padding: 1.5rem 0;
+    justify-content: center;
+    gap: 0;
+}
+
+.sidebar.collapsed .sidebar-nav {
+    padding: 0 0.625rem;
+}
+
+.sidebar.collapsed .nav-group-label {
+    opacity: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    transition: opacity 0.15s ease, height 0.25s ease, margin 0.25s ease;
+}
+
+.sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 0.75rem;
+    gap: 0;
+    border-radius: 12px;
+}
+
+.sidebar.collapsed .nav-item span:not(.material-symbols-outlined) {
+    display: none;
+}
+
+/* Active indicator bar hidden in collapsed state (use bg instead) */
+.sidebar.collapsed .nav-item::before {
+    display: none;
+}
+
+/* Tooltip on hover for collapsed sidebar nav items */
+.sidebar.collapsed .nav-item {
+    position: relative;
+}
+
+.sidebar.collapsed .nav-item::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%) scale(0.9);
+    background: rgba(26, 22, 8, 0.98);
+    color: var(--text-primary);
+    padding: 0.5rem 0.875rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid rgba(242, 204, 13, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s var(--ease-out-quint);
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    border-radius: 8px;
+}
+
+.sidebar.collapsed .nav-item:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
 }
 
 .sidebar-logo {
-    padding: 1.5rem;
+    padding: 1.75rem 1.5rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    position: relative;
+}
+
+/* Subtle bottom divider glow under logo */
+.sidebar-logo::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 1.5rem;
+    right: 1.5rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(242, 204, 13, 0.15), transparent);
 }
 
 .sidebar-logo-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-md);
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
     background: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--bg-dark);
+    box-shadow: 0 4px 12px rgba(242, 204, 13, 0.25);
+    transition: transform 0.3s var(--ease-out-quint), box-shadow 0.3s;
+    flex-shrink: 0;
+}
+
+.sidebar-logo:hover .sidebar-logo-icon {
+    transform: scale(1.05) rotate(-2deg);
+    box-shadow: 0 6px 18px rgba(242, 204, 13, 0.35);
 }
 
 .sidebar-logo-title {
     font-family: var(--font-display);
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.025em;
     color: var(--text-warm-white);
+    transition: opacity 0.25s ease, width 0.35s var(--ease-out-quint);
 }
 
 .sidebar-logo-subtitle {
@@ -228,18 +437,19 @@ button:focus-visible, a:focus-visible, input:focus-visible {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-top: 2px;
+    transition: opacity 0.25s ease, width 0.35s var(--ease-out-quint);
 }
 
 .sidebar-nav {
     flex: 1;
-    padding: 0 1rem;
+    padding: 0.5rem 0.875rem;
     overflow-y: auto;
 }
 
 .nav-group {
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid rgba(120, 53, 15, 0.1);
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(242, 204, 13, 0.04);
 }
 
 .nav-group:last-child {
@@ -247,51 +457,133 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 }
 
 .nav-group-label {
-    padding: 0 0.75rem;
+    padding: 0.25rem 0.75rem;
     font-size: 0.625rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     color: var(--text-muted);
     font-weight: 700;
     margin-bottom: 0.5rem;
+    transition: opacity 0.25s ease, height 0.25s ease;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: var(--radius-md);
+    padding: 0.625rem 0.75rem;
+    border-radius: 10px;
     color: var(--text-secondary);
-    transition: all 0.2s;
+    transition: all 0.25s var(--ease-out-quint);
     font-weight: 500;
     font-size: 0.875rem;
+    position: relative;
+    margin-bottom: 2px;
+    overflow: hidden;
+}
+
+/* Hover glow background */
+.nav-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--primary);
+    border-radius: 0 4px 4px 0;
+    opacity: 0;
+    transform: scaleY(0);
+    transition: all 0.25s var(--ease-out-quint);
 }
 
 .nav-item:hover {
-    background-color: var(--primary-muted);
-    color: var(--primary);
+    background: rgba(242, 204, 13, 0.06);
+    color: var(--text-primary);
+    transform: translateX(2px);
+}
+
+.nav-item:hover::before {
+    opacity: 0.5;
+    transform: scaleY(0.5);
+}
+
+.nav-item:active {
+    transform: translateX(2px) scale(0.98);
 }
 
 .nav-item.active {
-    background-color: var(--primary);
-    color: var(--bg-dark);
+    background: linear-gradient(90deg, rgba(242, 204, 13, 0.15) 0%, rgba(242, 204, 13, 0.05) 100%);
+    color: var(--primary);
     font-weight: 700;
+}
+
+.nav-item.active::before {
+    opacity: 1;
+    transform: scaleY(0.6);
+}
+
+.nav-item.active .material-symbols-outlined {
+    font-variation-settings: 'FILL' 1;
 }
 
 .nav-item .material-symbols-outlined {
     font-size: 22px;
+    transition: transform 0.25s var(--ease-out-quint);
+    flex-shrink: 0;
+}
+
+.nav-item:hover .material-symbols-outlined {
+    transform: scale(1.1);
+}
+
+/* --- Mobile Responsive Sidebar --- */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        transform: translateX(-100%);
+        width: 280px;
+        z-index: 50;
+        box-shadow: 8px 0 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+        display: block;
+    }
+
+    .mobile-menu-btn {
+        display: flex;
+    }
+
+    .sidebar-toggle-btn {
+        display: none;
+    }
+
+    .main-area {
+        margin-left: 0;
+    }
+
+    .top-header {
+        padding-left: 4rem;
+    }
 }
 
 .sidebar-upgrade {
     padding: 1rem;
-    border-top: 1px solid var(--border-subtle);
+    border-top: 1px solid rgba(242, 204, 13, 0.06);
 }
 
 .upgrade-card {
-    background-color: rgba(120, 53, 15, 0.2);
+    background: linear-gradient(135deg, rgba(120, 53, 15, 0.2) 0%, rgba(242, 204, 13, 0.08) 100%);
     border: 1px solid rgba(242, 204, 13, 0.1);
-    border-radius: var(--radius-lg);
+    border-radius: 12px;
     padding: 1rem;
 }
 
@@ -316,13 +608,14 @@ button:focus-visible, a:focus-visible, input:focus-visible {
     color: var(--bg-dark);
     font-size: 0.75rem;
     font-weight: 700;
-    border-radius: var(--radius-md);
-    box-shadow: 0 4px 10px rgba(242, 204, 13, 0.2);
-    transition: transform 0.2s;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(242, 204, 13, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .upgrade-btn:hover {
     transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(242, 204, 13, 0.3);
 }
 
 /* --- Main Area --- */

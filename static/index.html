@@ -11,11 +11,19 @@
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=12356">
+    <link rel="stylesheet" href="/static/style.css?v=20001">
 </head>
 
 <body>
     <div class="app-layout">
+
+        <!-- Mobile Hamburger Button -->
+        <button class="mobile-menu-btn" id="mobile-menu-btn" title="Open menu">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+
+        <!-- Mobile Overlay -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
         <!-- ========== LEFT SIDEBAR ========== -->
         <aside class="sidebar" id="sidebar">
@@ -32,42 +40,47 @@
             <nav class="sidebar-nav custom-scrollbar">
                 <div class="nav-group">
                     <p class="nav-group-label">Menu</p>
-                    <a href="/" class="nav-item active" data-link data-view="view-home">
+                    <a href="/" class="nav-item active" data-link data-view="view-home" data-tooltip="Home">
                         <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">home</span>
                         <span>Home</span>
                     </a>
-                    <a href="/search" class="nav-item" data-link data-view="view-search">
+                    <a href="/search" class="nav-item" data-link data-view="view-search" data-tooltip="Explore">
                         <span class="material-symbols-outlined">explore</span>
                         <span>Explore</span>
                     </a>
                 </div>
                 <div class="nav-group">
                     <p class="nav-group-label">Discovery</p>
-                    <a href="/trending" class="nav-item" data-link data-view="view-home" data-mode="trending">
+                    <a href="/trending" class="nav-item" data-link data-view="view-home" data-mode="trending" data-tooltip="Trending Now">
                         <span class="material-symbols-outlined">local_fire_department</span>
                         <span>Trending Now</span>
                     </a>
-                    <a href="/latest" class="nav-item" data-link data-view="view-home" data-mode="latest">
+                    <a href="/latest" class="nav-item" data-link data-view="view-home" data-mode="latest" data-tooltip="New Releases">
                         <span class="material-symbols-outlined">new_releases</span>
                         <span>New Releases</span>
                     </a>
-                    <a href="/saved" class="nav-item" data-link data-view="view-saved">
+                    <a href="/saved" class="nav-item" data-link data-view="view-saved" data-tooltip="Watchlist">
                         <span class="material-symbols-outlined">bookmarks</span>
                         <span>Watchlist</span>
                     </a>
                 </div>
                 <div class="nav-group">
                     <p class="nav-group-label">Social</p>
-                    <a href="/community" class="nav-item" data-link data-view="view-community">
+                    <a href="/community" class="nav-item" data-link data-view="view-community" data-tooltip="Community">
                         <span class="material-symbols-outlined">group</span>
                         <span>Community</span>
                     </a>
-                    <a href="/profile" class="nav-item" data-link data-view="view-profile">
+                    <a href="/profile" class="nav-item" data-link data-view="view-profile" data-tooltip="Profile">
                         <span class="material-symbols-outlined">person</span>
                         <span>Profile</span>
                     </a>
                 </div>
             </nav>
+
+            <!-- Sidebar Toggle Button -->
+            <button class="sidebar-toggle-btn" id="sidebar-toggle" title="Collapse sidebar">
+                <span class="material-symbols-outlined sidebar-toggle-icon">chevron_left</span>
+            </button>
 
         </aside>
 

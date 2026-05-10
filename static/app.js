@@ -156,6 +156,55 @@ document.addEventListener("DOMContentLoaded", () => {
     setupGlobalSearch();
     if (typeof initRightSidebar === 'function') initRightSidebar();
 
+    // --- Sidebar Toggle (Desktop Collapse) ---
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+
+    if (sidebar && sidebarToggle) {
+        // Restore saved state
+        const isCollapsed = localStorage.getItem('flimo_sidebar_collapsed') === 'true';
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+            sidebarToggle.title = 'Expand sidebar';
+        }
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            const nowCollapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem('flimo_sidebar_collapsed', nowCollapsed);
+            sidebarToggle.title = nowCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+        });
+    }
+
+    // --- Mobile Sidebar Toggle ---
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+    const closeMobileSidebar = () => {
+        if (sidebar) sidebar.classList.remove('mobile-open');
+        if (sidebarOverlay) sidebarOverlay.classList.remove('visible');
+    };
+
+    if (mobileMenuBtn && sidebar) {
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-open');
+            if (sidebarOverlay) sidebarOverlay.classList.toggle('visible');
+        });
+    }
+
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeMobileSidebar);
+    }
+
+    // Close mobile sidebar when a nav link is clicked
+    document.querySelectorAll('.nav-item[data-link]').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                closeMobileSidebar();
+            }
+        });
+    });
+
     // Trailer Modal Global Handlers
     const trailerModal = document.getElementById('trailer-modal');
     const trailerClose = document.getElementById('trailer-modal-close');
